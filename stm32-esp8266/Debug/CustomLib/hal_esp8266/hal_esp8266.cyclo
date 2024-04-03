@@ -1,0 +1,15 @@
+../CustomLib/hal_esp8266/hal_esp8266.c:33:6:esp8266_cb_register_ip	1
+../CustomLib/hal_esp8266/hal_esp8266.c:37:6:esp8266_cb_register_mqtt	1
+../CustomLib/hal_esp8266/hal_esp8266.c:41:13:WaitForResponse	4
+../CustomLib/hal_esp8266/hal_esp8266.c:58:6:isIpData	1
+../CustomLib/hal_esp8266/hal_esp8266.c:62:6:isMqttData	1
+../CustomLib/hal_esp8266/hal_esp8266.c:66:6:esp8266_recv	8
+../CustomLib/hal_esp8266/hal_esp8266.c:114:20:esp8266_tx	1
+../CustomLib/hal_esp8266/hal_esp8266.c:118:6:esp8266_send_cmd	1
+../CustomLib/hal_esp8266/hal_esp8266.c:124:6:esp8266_send_ip_data	3
+../CustomLib/hal_esp8266/hal_esp8266.c:138:6:esp8266_udp_begin	1
+../CustomLib/hal_esp8266/hal_esp8266.c:147:6:esp8266_wifi_connect	1
+../CustomLib/hal_esp8266/hal_esp8266.c:161:13:get_ip_address	3
+../CustomLib/hal_esp8266/hal_esp8266.c:181:13:get_wifi_details	4
+../CustomLib/hal_esp8266/hal_esp8266.c:204:6:esp8266_reset	1
+../CustomLib/hal_esp8266/hal_esp8266.c:211:6:esp8266_init	4

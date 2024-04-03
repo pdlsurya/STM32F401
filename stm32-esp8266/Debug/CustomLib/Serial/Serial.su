@@ -1,0 +1,8 @@
+../CustomLib/Serial/Serial.c:29:6:HAL_UART_RxCpltCallback	16	static
+../CustomLib/Serial/Serial.c:39:6:Serial_Available	4	static
+../CustomLib/Serial/Serial.c:44:13:NextByteAvailable	16	static
+../CustomLib/Serial/Serial.c:57:6:Serial_Flush	8	static
+../CustomLib/Serial/Serial.c:65:6:Serial_Write	16	static
+../CustomLib/Serial/Serial.c:69:9:Serial_ReadByte	16	static
+../CustomLib/Serial/Serial.c:80:7:Serial_ReadLine	16	static
+../CustomLib/Serial/Serial.c:105:6:Serial_Init	16	static

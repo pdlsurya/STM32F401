@@ -1,0 +1,5 @@
+../CustomLib/NTP_Clock/NTP_Clock.c:41:13:ntp_request_server	8	static
+../CustomLib/NTP_Clock/NTP_Clock.c:51:13:ntp_display_time	48	static
+../CustomLib/NTP_Clock/NTP_Clock.c:72:6:rx_cb_1	16	static
+../CustomLib/NTP_Clock/NTP_Clock.c:87:6:ntp_update_time	72	static
+../CustomLib/NTP_Clock/NTP_Clock.c:120:6:ntp_begin	16	static

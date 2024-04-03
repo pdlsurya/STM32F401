@@ -1,0 +1,6 @@
+../CustomLib/flashProgram/flashProgram.c:21:6:disable_peripheral_clock	1
+../CustomLib/flashProgram/flashProgram.c:26:6:bootloader_init	2
+../CustomLib/flashProgram/flashProgram.c:34:6:update_available	2
+../CustomLib/flashProgram/flashProgram.c:42:26:erase_flash	1
+../CustomLib/flashProgram/flashProgram.c:55:26:program_flash	4
+../CustomLib/flashProgram/flashProgram.c:78:19:flash_process	4

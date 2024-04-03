@@ -1,0 +1,4 @@
+../CustomLib/flashProgram/flashProgram.c:88:6:disable_peripheral_clock	8	static
+../CustomLib/flashProgram/flashProgram.c:93:6:bootloader_init	0	static
+../CustomLib/flashProgram/flashProgram.c:101:6:update_available	64	static
+../CustomLib/flashProgram/flashProgram.c:278:19:flash_process	96	static

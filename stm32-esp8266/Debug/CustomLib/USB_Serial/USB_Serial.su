@@ -1,0 +1,2 @@
+../CustomLib/USB_Serial/USB_Serial.c:14:6:USB_SerialInit	8	static
+../CustomLib/USB_Serial/USB_Serial.c:19:6:USB_SerialPrint	152	static
