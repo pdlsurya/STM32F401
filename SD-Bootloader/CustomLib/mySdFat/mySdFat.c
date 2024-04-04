@@ -48,39 +48,41 @@ uint8_t fileNameIndex;
  * @return true
  * @return false
  */
-static bool getBootSecParams() {
-	if (SD_readSector(BOOT_SEC_START, SD_buff) == SD_READ_SUCCESS) {
+static bool getBootSecParams()
+{
+	if (SD_readSector(BOOT_SEC_START, SD_buff) == SD_READ_SUCCESS)
+	{
 
-		params.BPB_BytesPerSec = (uint16_t) SD_buff[11];
-		params.BPB_BytesPerSec |= (uint16_t) (SD_buff[12] << 8);
+		params.BPB_BytesPerSec = (uint16_t)SD_buff[11];
+		params.BPB_BytesPerSec |= (uint16_t)(SD_buff[12] << 8);
 
 		params.BPB_SecPerClus = SD_buff[13];
 
-		params.BPB_RsvdSecCnt = (uint16_t) SD_buff[14];
-		params.BPB_RsvdSecCnt |= ((uint16_t) SD_buff[15]) << 8;
+		params.BPB_RsvdSecCnt = (uint16_t)SD_buff[14];
+		params.BPB_RsvdSecCnt |= ((uint16_t)SD_buff[15]) << 8;
 
-		params.BPB_TotSec32 = ((uint32_t) SD_buff[32]);
-		params.BPB_TotSec32 |= ((uint32_t) SD_buff[33]) << 8;
-		params.BPB_TotSec32 |= ((uint32_t) SD_buff[34]) << 16;
-		params.BPB_TotSec32 |= ((uint32_t) SD_buff[35]) << 24;
+		params.BPB_TotSec32 = ((uint32_t)SD_buff[32]);
+		params.BPB_TotSec32 |= ((uint32_t)SD_buff[33]) << 8;
+		params.BPB_TotSec32 |= ((uint32_t)SD_buff[34]) << 16;
+		params.BPB_TotSec32 |= ((uint32_t)SD_buff[35]) << 24;
 
-		params.BPB_FATSz32 = ((uint32_t) SD_buff[36]);
-		params.BPB_FATSz32 |= ((uint32_t) SD_buff[37]) << 8;
-		params.BPB_FATSz32 |= ((uint32_t) SD_buff[38]) << 16;
-		params.BPB_FATSz32 |= ((uint32_t) SD_buff[39]) << 24;
+		params.BPB_FATSz32 = ((uint32_t)SD_buff[36]);
+		params.BPB_FATSz32 |= ((uint32_t)SD_buff[37]) << 8;
+		params.BPB_FATSz32 |= ((uint32_t)SD_buff[38]) << 16;
+		params.BPB_FATSz32 |= ((uint32_t)SD_buff[39]) << 24;
 
-		params.BPB_RootEntCnt = (uint16_t) SD_buff[17];
-		params.BPB_RootEntCnt |= ((uint16_t) SD_buff[18]) << 8;
+		params.BPB_RootEntCnt = (uint16_t)SD_buff[17];
+		params.BPB_RootEntCnt |= ((uint16_t)SD_buff[18]) << 8;
 
 		params.BPB_NumFATs = SD_buff[16];
 
-		params.BPB_RootClus = ((uint32_t) SD_buff[44]);
-		params.BPB_RootClus |= ((uint32_t) SD_buff[45]) << 8;
-		params.BPB_RootClus |= ((uint32_t) SD_buff[46]) << 16;
-		params.BPB_RootClus |= ((uint32_t) SD_buff[47]) << 24;
+		params.BPB_RootClus = ((uint32_t)SD_buff[44]);
+		params.BPB_RootClus |= ((uint32_t)SD_buff[45]) << 8;
+		params.BPB_RootClus |= ((uint32_t)SD_buff[46]) << 16;
+		params.BPB_RootClus |= ((uint32_t)SD_buff[47]) << 24;
 
-		params.BPB_FSInfo = (uint16_t) (SD_buff[48]);
-		params.BPB_FSInfo |= ((uint16_t) (SD_buff[49])) << 8;
+		params.BPB_FSInfo = (uint16_t)(SD_buff[48]);
+		params.BPB_FSInfo |= ((uint16_t)(SD_buff[49])) << 8;
 
 		memcpy(params.BS_VolLab, &SD_buff[71], 11);
 		params.BS_VolLab[8] = '\0';
@@ -96,7 +98,8 @@ static bool getBootSecParams() {
  * @return FATtype
  */
 
-static FATtype getFatType() {
+static FATtype getFatType()
+{
 	uint32_t clusterCnt = DataSectorsCnt / params.BPB_SecPerClus;
 
 	if (clusterCnt <= 4085)
@@ -115,10 +118,10 @@ static FATtype getFatType() {
  * @param[in] fat_entry_index  entry index of FAT table
  *
  */
-static fatEntLoc_t fatEntLocation(uint32_t fat_entry_index) {
+static fatEntLoc_t fatEntLocation(uint32_t fat_entry_index)
+{
 	fatEntLoc_t fatEntLoc;
-	fatEntLoc.fatSecNum = FatStartSector
-			+ (fat_entry_index * 4 / params.BPB_BytesPerSec);
+	fatEntLoc.fatSecNum = FatStartSector + (fat_entry_index * 4 / params.BPB_BytesPerSec);
 	fatEntLoc.fatEntOffset = (fat_entry_index * 4) % params.BPB_BytesPerSec;
 	return fatEntLoc;
 }
@@ -129,117 +132,135 @@ static fatEntLoc_t fatEntLocation(uint32_t fat_entry_index) {
  * @param[in] fatThisClus Current cluster index
  * @return next cluster
  */
-static uint32_t fatNextClus(uint32_t fatThisClus) {
+static uint32_t fatNextClus(uint32_t fatThisClus)
+{
 	uint32_t temp;
 	fatEntLoc_t fatEntLoc = fatEntLocation(fatThisClus);
 	SD_readSector(fatEntLoc.fatSecNum, SD_buff);
-	temp = *((uint32_t*) &SD_buff[fatEntLoc.fatEntOffset]);
+	temp = *((uint32_t *)&SD_buff[fatEntLoc.fatEntOffset]);
 
 	return temp;
 }
 
-static void fatSetNextClus(uint32_t fatThisClus, uint32_t fatNextClus) {
+static void fatSetNextClus(uint32_t fatThisClus, uint32_t fatNextClus)
+{
 	uint32_t *p_temp;
 	fatEntLoc_t fatEntLoc = fatEntLocation(fatThisClus);
 	SD_readSector(fatEntLoc.fatSecNum, SD_buff);
-	p_temp = ((uint32_t*) &SD_buff[fatEntLoc.fatEntOffset]);
+	p_temp = ((uint32_t *)&SD_buff[fatEntLoc.fatEntOffset]);
 	memcpy(p_temp, &fatNextClus, 4);
 	SD_writeSector(fatEntLoc.fatSecNum, SD_buff);
 }
 
-static uint32_t startSecOfClus(uint32_t cluster_index) {
+static uint32_t startSecOfClus(uint32_t cluster_index)
+{
 	return (DataStartSector + (cluster_index - 2) * params.BPB_SecPerClus);
 }
 
-static void displayTime(uint16_t time) {
+static void displayTime(uint16_t time)
+{
 	uint8_t hours = (time & 0xF800) >> 11;
 	uint8_t minutes = (time & 0x07E0) >> 5;
 	uint8_t seconds = (time & 0x001F) * 2;
-	//USB_SerialPrint(hours > 10 ? "%d" : "0%d", hours);
-	//USB_SerialPrint(":");
-	//USB_SerialPrint(minutes > 10 ? "%d" : "0%d", minutes);
-	//USB_SerialPrint(":");
-	//USB_SerialPrint(seconds > 10 ? "%d" : "0%d", seconds);
+	// USB_SerialPrint(hours > 10 ? "%d" : "0%d", hours);
+	// USB_SerialPrint(":");
+	// USB_SerialPrint(minutes > 10 ? "%d" : "0%d", minutes);
+	// USB_SerialPrint(":");
+	// USB_SerialPrint(seconds > 10 ? "%d" : "0%d", seconds);
 }
 
-static void displayDate(uint16_t date) {
+static void displayDate(uint16_t date)
+{
 	uint16_t year = 1980;
 	year += (date & 0xF700) >> 9;
 	uint8_t month = (date & 0x01E0) >> 5;
 	uint8_t day = (date & 0x001F);
-	//USB_SerialPrint("%d", year);
-	//USB_SerialPrint("-");
-	//USB_SerialPrint(month < 10 ? "0%d" : "%d", month);
-	//USB_SerialPrint("-");
-	//USB_SerialPrint(day < 10 ? "0%d" : "%d", month);
+	// USB_SerialPrint("%d", year);
+	// USB_SerialPrint("-");
+	// USB_SerialPrint(month < 10 ? "0%d" : "%d", month);
+	// USB_SerialPrint("-");
+	// USB_SerialPrint(day < 10 ? "0%d" : "%d", month);
 }
 
-static void getShortFileName(myFile *pFile) {
+static void getShortFileName(myFile *pFile)
+{
 	uint8_t nameIndx = 0;
-	for (uint8_t index = 0; index < 8; index++) {
+	for (uint8_t index = 0; index < 8; index++)
+	{
 		if (pFile->DIR_Name[index] == ' ')
 			break;
 
-		if (pFile->DIR_NTRes & 0x08) {
-			if ((pFile->DIR_Name[index] > 64)
-					&& (pFile->DIR_Name[index] < 91)) {
+		if (pFile->DIR_NTRes & 0x08)
+		{
+			if ((pFile->DIR_Name[index] > 64) && (pFile->DIR_Name[index] < 91))
+			{
 				fileName[nameIndx++] = pFile->DIR_Name[index] + 32;
-			} else
+			}
+			else
 				fileName[nameIndx++] = pFile->DIR_Name[index];
 		}
 
 		else
 			fileName[nameIndx++] = pFile->DIR_Name[index];
 	}
-	if ((pFile->DIR_attr & ATTR_DIRECTORY) == 0) {
-		if (pFile->DIR_ext[0] != ' ') {
+	if ((pFile->DIR_attr & ATTR_DIRECTORY) == 0)
+	{
+		if (pFile->DIR_ext[0] != ' ')
+		{
 			fileName[nameIndx++] = '.';
 			for (uint8_t index = 0; index < 3; index++)
 				fileName[nameIndx++] =
-						(pFile->DIR_ext[index] == ' ') ?
-								'\0' : pFile->DIR_ext[index] + 32;
+					(pFile->DIR_ext[index] == ' ') ? '\0' : pFile->DIR_ext[index] + 32;
 		}
 	}
 }
 
-uint32_t startCluster(myFile *pFile) {
-	uint32_t startClus = (uint32_t) pFile->DIR_FstClusLO;
-	startClus |= ((uint32_t) (pFile->DIR_FstClusHI)) << 16;
+uint32_t startCluster(myFile *pFile)
+{
+	uint32_t startClus = (uint32_t)pFile->DIR_FstClusLO;
+	startClus |= ((uint32_t)(pFile->DIR_FstClusHI)) << 16;
 	return startClus;
 }
 
-static inline bool isFreeEntry(myFile *pFile) {
-	return ((uint8_t) (pFile->DIR_Name[0]) == 0xE5);
+static inline bool isFreeEntry(myFile *pFile)
+{
+	return ((uint8_t)(pFile->DIR_Name[0]) == 0xE5);
 }
 
-bool isDirectory(myFile *pFile) {
+bool isDirectory(myFile *pFile)
+{
 	return !(((pFile->DIR_attr & (ATTR_DIRECTORY | ATTR_VOLUME_ID)) == 0));
 }
 
-bool isEndOfDir(myFile *pFile) {
-	return ((uint8_t) (pFile->DIR_Name[0]) == 0);
+bool isEndOfDir(myFile *pFile)
+{
+	return ((uint8_t)(pFile->DIR_Name[0]) == 0);
 }
 
-bool isValidFile(myFile *pFile) {
+bool isValidFile(myFile *pFile)
+{
 	return !(isEndOfDir(pFile) || (fileName[0] == '.' && fileName[1] == '_'));
 }
 
-static bool LFN_Entry(myFile *pFile) {
-	return (((pFile->DIR_attr & ATTR_LONG_NAME_MASK) == ATTR_LONG_FILE_NAME)
-			&& (((uint8_t) pFile->DIR_Name[0] & 0xF0) == 0x40));
+static bool LFN_Entry(myFile *pFile)
+{
+	return (((pFile->DIR_attr & ATTR_LONG_NAME_MASK) == ATTR_LONG_FILE_NAME) && (((uint8_t)pFile->DIR_Name[0] & 0xF0) == 0x40));
 }
 
-uint8_t fileLfnEntCnt(myFile *pFile) {
+uint8_t fileLfnEntCnt(myFile *pFile)
+{
 	return pFile->fileEntInf.LFN_EntCnt;
 }
 
-uint32_t fileSize(myFile *pFile) {
+uint32_t fileSize(myFile *pFile)
+{
 	return pFile->DIR_FileSize;
 }
 
-myFile rootDir() {
+myFile rootDir()
+{
 	SD_readSector(startSecOfClus(params.BPB_RootClus), SD_buff);
-	myFile rootDir = *((myFile*) &SD_buff[0]);
+	myFile rootDir = *((myFile *)&SD_buff[0]);
 	rootDir.DIR_FstClusLO = 2;
 	rootDir.entryIndex = 1;
 
@@ -251,81 +272,91 @@ myFile rootDir() {
  * @param[in] pFolder  pointer to the folder
  * @return next file in the folder
  */
-myFile nextFile(myFile *pFolder) {
+myFile nextFile(myFile *pFolder)
+{
 	uint8_t sectorIndex = (pFolder->entryIndex / 16) % params.BPB_SecPerClus;
 	uint32_t currentClus = startCluster(pFolder);
-	myFile temp = { 0 };
+	myFile temp = {0};
 
-	uint32_t currentClusterIndex = (pFolder->entryIndex
-			/ (16 * params.BPB_SecPerClus));
+	uint32_t currentClusterIndex = (pFolder->entryIndex / (16 * params.BPB_SecPerClus));
 
-	for (uint8_t i = 0; i < currentClusterIndex; i++) {
+	for (uint8_t i = 0; i < currentClusterIndex; i++)
+	{
 		currentClus = fatNextClus(currentClus);
-		if (currentClus >= FAT_EOC) {
+		if (currentClus >= FAT_EOC)
+		{
 			pFolder->entryIndex = 2;
 			memset(&temp, 0, sizeof(myFile));
 			return temp;
 		}
 	}
 
-	if (pFolder->entryIndex <= 2) {
+	if (pFolder->entryIndex <= 2)
+	{
 		sectorIndex = 0;
 		currentClus = startCluster(pFolder);
 	}
 
-	if (!isDirectory(pFolder)) {
-		//USB_SerialPrint("Not a Dir\n");
+	if (!isDirectory(pFolder))
+	{
+		// USB_SerialPrint("Not a Dir\n");
 		memset(&temp, 0, sizeof(myFile));
 		return temp;
 	}
 
-	while (1) {
+	while (1)
+	{
 
 		SD_readSector(startSecOfClus(currentClus) + sectorIndex, SD_buff);
 
-		temp = *((myFile*) (SD_buff + (pFolder->entryIndex % 16) * 32));
+		temp = *((myFile *)(SD_buff + (pFolder->entryIndex % 16) * 32));
 
-		if (!isFreeEntry(&temp)) {
-			if (isEndOfDir(&temp)) {
+		if (!isFreeEntry(&temp))
+		{
+			if (isEndOfDir(&temp))
+			{
 				memset(&temp, 0, sizeof(myFile));
 				return temp;
 			}
 
-			if (LFN_Entry(&temp)) {
+			if (LFN_Entry(&temp))
+			{
 
 				memset(fileName, 0, sizeof(fileName));
-				uint8_t LFN_entryCnt = ((((LFN_entry_t*) &temp)->LDIR_Ord)
-						& 0x0F);
+				uint8_t LFN_entryCnt = ((((LFN_entry_t *)&temp)->LDIR_Ord) & 0x0F);
 				uint8_t lfnEntCntTemp = LFN_entryCnt;
 				char tempName[LFN_entryCnt][13];
-				while (LFN_entryCnt) {
+				while (LFN_entryCnt)
+				{
 					uint8_t tempNameIndex;
-					LFN_entry_t *entry = (LFN_entry_t*) (SD_buff
-							+ (pFolder->entryIndex % 16) * 32);
+					LFN_entry_t *entry = (LFN_entry_t *)(SD_buff + (pFolder->entryIndex % 16) * 32);
 
 					for (uint8_t i = 0; i < 10; i += 2)
 						tempName[LFN_entryCnt - 1][tempNameIndex++] =
-								entry->LDIR_Name1[i];
+							entry->LDIR_Name1[i];
 
 					for (uint8_t i = 0; i < 12; i += 2)
 						tempName[LFN_entryCnt - 1][tempNameIndex++] =
-								entry->LDIR_Name2[i];
+							entry->LDIR_Name2[i];
 
 					for (uint8_t i = 0; i < 4; i += 2)
 						tempName[LFN_entryCnt - 1][tempNameIndex++] =
-								entry->LDIR_Name3[i];
+							entry->LDIR_Name3[i];
 
 					LFN_entryCnt--;
 					tempNameIndex = 0;
 					pFolder->entryIndex++;
 
-					if ((pFolder->entryIndex % 16) == 0) {
+					if ((pFolder->entryIndex % 16) == 0)
+					{
 						sectorIndex++;
 
-						if (sectorIndex == params.BPB_SecPerClus) {
+						if (sectorIndex == params.BPB_SecPerClus)
+						{
 							sectorIndex = 0;
 							currentClus = fatNextClus(currentClus);
-							if (currentClus >= FAT_EOC) {
+							if (currentClus >= FAT_EOC)
+							{
 								pFolder->entryIndex = 2;
 								memset(&temp, 0, sizeof(myFile));
 								return temp;
@@ -333,11 +364,11 @@ myFile nextFile(myFile *pFolder) {
 						}
 
 						SD_readSector(startSecOfClus(currentClus) + sectorIndex,
-								SD_buff);
+									  SD_buff);
 					}
 				}
 
-				char *p_name = (char*) tempName;
+				char *p_name = (char *)tempName;
 
 				// Copy filename to fileName global string buffer.
 				while ((*p_name) != '\0')
@@ -345,7 +376,7 @@ myFile nextFile(myFile *pFolder) {
 
 				fileNameIndex = 0;
 
-				temp = *((myFile*) (SD_buff + (pFolder->entryIndex % 16) * 32));
+				temp = *((myFile *)(SD_buff + (pFolder->entryIndex % 16) * 32));
 				temp.fileEntInf.Cluster = currentClus;
 				temp.fileEntInf.sectorIndex = sectorIndex;
 				temp.fileEntInf.entryIndex = pFolder->entryIndex % 16;
@@ -355,7 +386,9 @@ myFile nextFile(myFile *pFolder) {
 				if (pFolder->entryIndex % 16 == 0)
 					sectorIndex++;
 				break;
-			} else {
+			}
+			else
+			{
 				memset(fileName, 0, sizeof(fileName));
 				getShortFileName(&temp);
 				temp.fileEntInf.Cluster = currentClus;
@@ -370,49 +403,51 @@ myFile nextFile(myFile *pFolder) {
 
 				break;
 			}
-		} else {
+		}
+		else
+		{
 
 			pFolder->entryIndex++;
 			if (pFolder->entryIndex % 16 == 0)
 				sectorIndex++;
 		}
 
-		if (sectorIndex == params.BPB_SecPerClus) {
+		if (sectorIndex == params.BPB_SecPerClus)
+		{
 			sectorIndex = 0;
 			currentClus = fatNextClus(currentClus);
-			if (currentClus >= FAT_EOC) {
+			if (currentClus >= FAT_EOC)
+			{
 				pFolder->entryIndex = 2;
 				memset(&temp, 0, sizeof(myFile));
 				return temp;
 			}
 		}
 	}
-	if (isDirectory(&temp))
-		temp.entryIndex = 2;
-	else
-		temp.entryIndex = 0;
+	temp.entryIndex = isDirectory(&temp) ? 2 : 0;
 
 	return temp;
 }
 
-static void dispFile(myFile *pFile, char *fileName, uint8_t tab) {
+static void dispFile(myFile *pFile, char *fileName, uint8_t tab)
+{
 	for (uint8_t i = 0; i < tab; i++)
-		//USB_SerialPrint("    ");
+		// USB_SerialPrint("    ");
 
-		//USB_SerialPrint("%s", fileName);
+		// USB_SerialPrint("%s", fileName);
 
 		if (isDirectory(pFile))
-			//USB_SerialPrint("/");
-			//USB_SerialPrint("     ");
+			// USB_SerialPrint("/");
+			// USB_SerialPrint("     ");
 
 			displayDate(pFile->DIR_WrtDate);
 
-	//USB_SerialPrint(" || ");
+	// USB_SerialPrint(" || ");
 	displayTime(pFile->DIR_WrtTime);
 
-	//USB_SerialPrint(" || ");
+	// USB_SerialPrint(" || ");
 
-	//USB_SerialPrint("%d Bytes\n", pFile->DIR_FileSize);
+	// USB_SerialPrint("%d Bytes\n", pFile->DIR_FileSize);
 	/*
 	 //USB_SerialPrint(" || ");
 	 //USB_SerialPrint("startClus:");
@@ -420,14 +455,18 @@ static void dispFile(myFile *pFile, char *fileName, uint8_t tab) {
 	 */
 }
 
-static myFile fileExists(const char *file, myFile *pFolder) {
-	myFile tempFile = { 0 };
+static myFile fileExists(const char *file, myFile *pFolder)
+{
+	myFile tempFile = {0};
 
-	do {
+	do
+	{
 		tempFile = nextFile(pFolder);
-		if (isValidFile(&tempFile)) {
+		if (isValidFile(&tempFile))
+		{
 			uint8_t nameIndx;
-			for (nameIndx = 0; nameIndx < strlen(file); nameIndx++) {
+			for (nameIndx = 0; nameIndx < strlen(file); nameIndx++)
+			{
 				if (file[nameIndx] != fileName[nameIndx])
 					break;
 			}
@@ -439,7 +478,8 @@ static myFile fileExists(const char *file, myFile *pFolder) {
 	return tempFile;
 }
 
-myFile pathExists(const char *path) {
+myFile pathExists(const char *path)
+{
 	myFile tempFile = rootDir();
 
 	if (strlen(path) == 1 && path[0] == '/')
@@ -447,9 +487,11 @@ myFile pathExists(const char *path) {
 
 	uint8_t index = 0;
 	uint8_t charCnt = 0;
-	while (path[charCnt] != '\0') {
+	while (path[charCnt] != '\0')
+	{
 		char dirName[36] = "";
-		for (uint8_t i = index + 1; i < index + 36; i++) {
+		for (uint8_t i = index + 1; i < index + 36; i++)
+		{
 			charCnt++;
 
 			if (path[i] == '/' || path[i] == '\0')
@@ -465,11 +507,13 @@ myFile pathExists(const char *path) {
 	return tempFile;
 }
 
-char* getExtension(char *file_name) {
+char *getExtension(char *file_name)
+{
 	static char ext[5] = "";
 	memset(ext, 0, sizeof(ext));
 	uint8_t idx = 0;
-	while (file_name[idx] != '.') {
+	while (file_name[idx] != '.')
+	{
 		idx++;
 		if (idx == strlen(file_name))
 			return ext;
@@ -478,27 +522,35 @@ char* getExtension(char *file_name) {
 	return ext;
 }
 
-static bool printContent(uint32_t startClus, uint32_t size) {
+static bool printContent(uint32_t startClus, uint32_t size)
+{
 	uint32_t charCnt = 0;
 
 	if (startClus == 0 || size == 0)
 		return 0;
 
-	//USB_SerialPrint("\n");
-	do {
-		if (SD_readMultipleSecStart(startSecOfClus(startClus)) == SD_READY) {
-			for (uint8_t i = 0; i < params.BPB_SecPerClus; i++) {
+	// USB_SerialPrint("\n");
+	do
+	{
+		if (SD_readMultipleSecStart(startSecOfClus(startClus)) == SD_READY)
+		{
+			for (uint8_t i = 0; i < params.BPB_SecPerClus; i++)
+			{
 				SD_readMultipleSec(SD_buff);
-				for (uint16_t c = 0; c < 512; c++) {
-					//USB_SerialPrint("%c", SD_buff[c]);
+				for (uint16_t c = 0; c < 512; c++)
+				{
+					// USB_SerialPrint("%c", SD_buff[c]);
 					charCnt++;
-					if (charCnt == size) {
+					if (charCnt == size)
+					{
 						SD_readMultipleSecStop();
 						return true;
 					}
 				}
 			}
-		} else {
+		}
+		else
+		{
 			// //USB_SerialPrint("Content read failed!");
 			return false;
 		}
@@ -507,56 +559,62 @@ static bool printContent(uint32_t startClus, uint32_t size) {
 	return true;
 }
 
-void fileClose(myFile *pFile) {
+void fileClose(myFile *pFile)
+{
 	memset(pFile, 0, sizeof(myFile));
 	SD_readMultipleSecStop();
 }
 
-bool isClosed(myFile *pFile) {
+bool isClosed(myFile *pFile)
+{
 	if ((startCluster(pFile) == 0) && (pFile->DIR_FileSize == 0))
 		return true;
 	return false;
 }
 
-void fileReset(myFile *pFile) {
-	//stop any on going multiple secotrs read
+void fileReset(myFile *pFile)
+{
+	// stop any on going multiple secotrs read
 	SD_readMultipleSecStop();
 
-	//reset index;
+	// reset index;
 	pFile->entryIndex = 0;
-
 }
 
-uint8_t readByte(myFile *pFile) {
+uint8_t readByte(myFile *pFile)
+{
 	static bool readStarted = false;
 	static uint32_t Cluster = 0xFFFFFFFF;
 
 	if (Cluster == 0xFFFFFFFF)
 		Cluster = startCluster(pFile);
 
-	if (pFile->entryIndex == 0) {
+	if (pFile->entryIndex == 0)
+	{
 		readStarted = false;
 		Cluster = startCluster(pFile);
 	}
 
-	if (isClosed(pFile)) {
+	if (isClosed(pFile))
+	{
 		SD_readMultipleSecStop();
 		readStarted = false;
 		return 0;
 	}
 
-	if (!readStarted) {
+	if (!readStarted)
+	{
 		SD_readMultipleSecStart(startSecOfClus(Cluster));
 		SD_readMultipleSec(SD_buff);
 		readStarted = true;
 	}
 
-	if ((pFile->entryIndex > 0)
-			&& (pFile->entryIndex
-					% (params.BPB_SecPerClus * params.BPB_BytesPerSec) == 0)) {
+	if ((pFile->entryIndex > 0) && (pFile->entryIndex % (params.BPB_SecPerClus * params.BPB_BytesPerSec) == 0))
+	{
 		SD_readMultipleSecStop();
 		Cluster = fatNextClus(Cluster);
-		if (Cluster >= FAT_EOC) {
+		if (Cluster >= FAT_EOC)
+		{
 			SD_readMultipleSecStop();
 			readStarted = false;
 			return 0;
@@ -564,17 +622,18 @@ uint8_t readByte(myFile *pFile) {
 		SD_readMultipleSecStart(startSecOfClus(Cluster));
 	}
 
-	if (pFile->entryIndex > 0
-			&& (pFile->entryIndex % params.BPB_BytesPerSec == 0))
+	if (pFile->entryIndex > 0 && (pFile->entryIndex % params.BPB_BytesPerSec == 0))
 		SD_readMultipleSec(SD_buff);
 
 	return SD_buff[(pFile->entryIndex++) % params.BPB_BytesPerSec];
 }
 
-bool readFile(const char *path, const char *fileName) {
+bool readFile(const char *path, const char *fileName)
+{
 	myFile tempFile = pathExists(path);
-	if (startCluster(&tempFile) == 0) {
-		//USB_SerialPrint("Invalid path\n");
+	if (startCluster(&tempFile) == 0)
+	{
+		// USB_SerialPrint("Invalid path\n");
 		return false;
 	}
 	tempFile = fileExists(fileName, &tempFile);
@@ -583,104 +642,120 @@ bool readFile(const char *path, const char *fileName) {
 
 	uint32_t startClus = startCluster(&tempFile);
 	printContent(startClus, tempFile.DIR_FileSize);
-	//USB_SerialPrint("\n");
+	// USB_SerialPrint("\n");
 
 	return true;
 }
 
-bool listDir(const char *path) {
+bool listDir(const char *path)
+{
 	myFile tempFile = pathExists(path);
-	if (startCluster(&tempFile) == 0) {
-		//USB_SerialPrint("Invalid Path!\n");
+	if (startCluster(&tempFile) == 0)
+	{
+		// USB_SerialPrint("Invalid Path!\n");
 		return false;
 	}
-	if (!isDirectory(&tempFile)) {
+	if (!isDirectory(&tempFile))
+	{
 		printContent(startCluster(&tempFile), tempFile.DIR_FileSize);
-		//USB_SerialPrint("\n");
+		// USB_SerialPrint("\n");
 		return true;
 	}
 
 	myFile folder = tempFile;
 
-	do {
+	do
+	{
 		tempFile = nextFile(&folder);
 		if (isValidFile(&tempFile))
 			dispFile(&tempFile, fileName, 0);
 	} while (!isEndOfDir(&tempFile));
-	//USB_SerialPrint("\n");
+	// USB_SerialPrint("\n");
 	return true;
 }
 
-void listDir_recursive(myFile *pFolder, uint8_t tab) {
+void listDir_recursive(myFile *pFolder, uint8_t tab)
+{
 	myFile tempFile;
 
-	do {
+	do
+	{
 		tempFile = nextFile(pFolder);
-		if (isValidFile(&tempFile)) {
-			if (isDirectory(&tempFile)) {
-				//USB_SerialPrint("\n");
+		if (isValidFile(&tempFile))
+		{
+			if (isDirectory(&tempFile))
+			{
+				// USB_SerialPrint("\n");
 				dispFile(&tempFile, fileName, tab);
 				listDir_recursive(&tempFile, tab + 2);
-				//USB_SerialPrint("\n");
-			} else
+				// USB_SerialPrint("\n");
+			}
+			else
 				dispFile(&tempFile, fileName, tab);
 		}
 	} while (!isEndOfDir(&tempFile));
 }
 
-static void fileSetStartClus(myFile *pFile, uint32_t cluster) {
+static void fileSetStartClus(myFile *pFile, uint32_t cluster)
+{
 
-	pFile->DIR_FstClusLO = (uint16_t) (cluster & 0x0000FFFF);
-	pFile->DIR_FstClusHI = (uint16_t) ((cluster & 0xFFFF0000) >> 16);
+	pFile->DIR_FstClusLO = (uint16_t)(cluster & 0x0000FFFF);
+	pFile->DIR_FstClusHI = (uint16_t)((cluster & 0xFFFF0000) >> 16);
 }
 
 static void fileSetDate(myFile *pFile, uint16_t year, uint8_t month,
-		uint8_t day) {
+						uint8_t day)
+{
 	year -= 1980;
 	pFile->DIR_WrtDate = day;
-	pFile->DIR_WrtDate |= (uint16_t) month << 5;
+	pFile->DIR_WrtDate |= (uint16_t)month << 5;
 	pFile->DIR_WrtDate |= year << 9;
 }
 
 static void fileSetTime(myFile *pFile, uint8_t hours, uint8_t minutes,
-		uint8_t seconds) {
-	pFile->DIR_WrtTime = (uint16_t) (seconds / 2);
-	pFile->DIR_WrtTime |= (uint16_t) minutes << 5;
-	pFile->DIR_WrtTime |= (uint16_t) hours << 11;
+						uint8_t seconds)
+{
+	pFile->DIR_WrtTime = (uint16_t)(seconds / 2);
+	pFile->DIR_WrtTime |= (uint16_t)minutes << 5;
+	pFile->DIR_WrtTime |= (uint16_t)hours << 11;
 }
 
-static freeEntInf_t getFreeEntry(myFile *Dir, uint8_t freeEntryCnt) {
+static freeEntInf_t getFreeEntry(myFile *Dir, uint8_t freeEntryCnt)
+{
 	freeEntInf_t frEntInf;
 	frEntInf.Cluster = startCluster(Dir);
-	do {
-		if (SD_readMultipleSecStart(startSecOfClus(frEntInf.Cluster))
-				== SD_READY) {
+	do
+	{
+		if (SD_readMultipleSecStart(startSecOfClus(frEntInf.Cluster)) == SD_READY)
+		{
 			for (frEntInf.sectorIndex = 0;
-					frEntInf.sectorIndex < params.BPB_SecPerClus;
-					frEntInf.sectorIndex++) {
+				 frEntInf.sectorIndex < params.BPB_SecPerClus;
+				 frEntInf.sectorIndex++)
+			{
 				SD_readMultipleSec(SD_buff);
 				for (frEntInf.entryIndex = 0; frEntInf.entryIndex < 16;
-						frEntInf.entryIndex++) {
-					myFile temp = *((myFile*) (SD_buff
-							+ frEntInf.entryIndex * 32));
-					if (isFreeEntry(&temp) || isEndOfDir(&temp)) {
-						if (isEndOfDir(&temp)) {
+					 frEntInf.entryIndex++)
+				{
+					myFile temp = *((myFile *)(SD_buff + frEntInf.entryIndex * 32));
+					if (isFreeEntry(&temp) || isEndOfDir(&temp))
+					{
+						if (isEndOfDir(&temp))
+						{
 							SD_readMultipleSecStop();
-							if ((frEntInf.entryIndex + freeEntryCnt) > 15) {
+							if ((frEntInf.entryIndex + freeEntryCnt) > 15)
+							{
 								SD_readSector(
-										startSecOfClus(frEntInf.Cluster)
-												+ frEntInf.sectorIndex,
-										SD_buff);
+									startSecOfClus(frEntInf.Cluster) + frEntInf.sectorIndex,
+									SD_buff);
 								for (uint8_t i = frEntInf.entryIndex; i < 16;
-										i++) {
-									myFile *pFile = (myFile*) (SD_buff
-											+ (i * 32));
+									 i++)
+								{
+									myFile *pFile = (myFile *)(SD_buff + (i * 32));
 									pFile->DIR_Name[0] = 0xE5;
 								}
 								SD_writeSector(
-										startSecOfClus(frEntInf.Cluster)
-												+ frEntInf.sectorIndex,
-										SD_buff);
+									startSecOfClus(frEntInf.Cluster) + frEntInf.sectorIndex,
+									SD_buff);
 
 								frEntInf.sectorIndex++;
 								frEntInf.entryIndex = 0;
@@ -688,18 +763,19 @@ static freeEntInf_t getFreeEntry(myFile *Dir, uint8_t freeEntryCnt) {
 							return frEntInf;
 						}
 
-						if (freeEntryCnt == 1) {
+						if (freeEntryCnt == 1)
+						{
 							SD_readMultipleSecStop();
 							return frEntInf;
 						}
 						uint8_t i;
-						for (i = 0; i < freeEntryCnt; i++) {
+						for (i = 0; i < freeEntryCnt; i++)
+						{
 							frEntInf.entryIndex += i;
 							if (frEntInf.entryIndex == 16)
 								break;
 
-							temp = *((myFile*) (SD_buff
-									+ frEntInf.entryIndex * 32));
+							temp = *((myFile *)(SD_buff + frEntInf.entryIndex * 32));
 							if (!isFreeEntry(&temp))
 								break;
 						}
@@ -711,7 +787,9 @@ static freeEntInf_t getFreeEntry(myFile *Dir, uint8_t freeEntryCnt) {
 					}
 				}
 			}
-		} else {
+		}
+		else
+		{
 			memset(&frEntInf, 0, sizeof(freeEntInf_t));
 			return frEntInf;
 		}
@@ -724,13 +802,14 @@ static freeEntInf_t getFreeEntry(myFile *Dir, uint8_t freeEntryCnt) {
 }
 
 static void get_datetime_numerical(uint16_t *year, uint8_t *month, uint8_t *day,
-		uint8_t *hour, uint8_t *minute, uint8_t *second) {
+								   uint8_t *hour, uint8_t *minute, uint8_t *second)
+{
 	const char *date_str = __DATE__; // e.g. "Apr 12 2023"
 	const char *time_str = __TIME__; // e.g. "23:59:59"
 	char *endptr;
 
 	// Parse date string
-	char monthStr[4] = { '\0' };
+	char monthStr[4] = {'\0'};
 	memcpy(monthStr, date_str, 3);
 	if (strcmp(monthStr, "Jan") == 0)
 		*month = 1;
@@ -777,29 +856,38 @@ static void get_datetime_numerical(uint16_t *year, uint8_t *month, uint8_t *day,
 	*second = strtol(endptr + 1, NULL, 10);
 }
 
-static uint8_t fileNameLength(const char *filename) {
+static uint8_t fileNameLength(const char *filename)
+{
 
 	uint8_t i;
-	for (i = 0; i < strlen(filename); i++) {
+	for (i = 0; i < strlen(filename); i++)
+	{
 		if (filename[i] == '.')
 			break;
 	}
 	return i;
 }
 
-static bool allLowerCase(const char *filename) {
-	for (uint8_t i = 0; i < fileNameLength(filename); i++) {
-		if ((((uint8_t) filename[i]) < 91) && (((uint8_t) filename[i]) > 64)) {
+static bool allLowerCase(const char *filename)
+{
+	for (uint8_t i = 0; i < fileNameLength(filename); i++)
+	{
+		if ((((uint8_t)filename[i]) < 91) && (((uint8_t)filename[i]) > 64))
+		{
 			return false;
 		}
 	}
 	return true;
 }
 
-static bool mixedLetters(const char *filename) {
-	if (!allLowerCase(filename)) {
-		for (uint8_t i = 0; i < fileNameLength(filename); i++) {
-			if (((uint8_t) filename[i] > 96)) {
+static bool mixedLetters(const char *filename)
+{
+	if (!allLowerCase(filename))
+	{
+		for (uint8_t i = 0; i < fileNameLength(filename); i++)
+		{
+			if (((uint8_t)filename[i] > 96))
+			{
 				return true;
 			}
 		}
@@ -807,22 +895,27 @@ static bool mixedLetters(const char *filename) {
 	return false;
 }
 
-static uint8_t create_sum(myFile *entry) {
+static uint8_t create_sum(myFile *entry)
+{
 	uint8_t i;
 	uint8_t Sum = 0;
 
-	for (i = 0; i < 8; i++) { /* Calculate sum of DIR_Name[] field */
-		Sum = (Sum >> 1) + (Sum << 7) + (uint8_t) entry->DIR_Name[i];
+	for (i = 0; i < 8; i++)
+	{ /* Calculate sum of DIR_Name[] field */
+		Sum = (Sum >> 1) + (Sum << 7) + (uint8_t)entry->DIR_Name[i];
 	}
-	for (i = 0; i < 3; i++) { /* Calculate sum of DIR_ext[]] field */
-		Sum = (Sum >> 1) + (Sum << 7) + (uint8_t) entry->DIR_ext[i];
+	for (i = 0; i < 3; i++)
+	{ /* Calculate sum of DIR_ext[]] field */
+		Sum = (Sum >> 1) + (Sum << 7) + (uint8_t)entry->DIR_ext[i];
 	}
 	return Sum;
 }
 
-static bool updateFSInfo(uint32_t nxtFreeClus) {
-	if (SD_readSector(FSInfo_SEC, SD_buff) == SD_READ_SUCCESS) {
-		FSInfo_t *p_fsinfo = (FSInfo_t*) SD_buff;
+static bool updateFSInfo(uint32_t nxtFreeClus)
+{
+	if (SD_readSector(FSInfo_SEC, SD_buff) == SD_READ_SUCCESS)
+	{
+		FSInfo_t *p_fsinfo = (FSInfo_t *)SD_buff;
 		p_fsinfo->FSI_Nxt_Free = nxtFreeClus;
 		p_fsinfo->FSI_Free_Count--;
 
@@ -834,29 +927,36 @@ static bool updateFSInfo(uint32_t nxtFreeClus) {
 	return false;
 }
 
-static uint32_t getNxtFreeClus() {
-	if (SD_readSector(FSInfo_SEC, SD_buff) == SD_READ_SUCCESS) {
+static uint32_t getNxtFreeClus()
+{
+	if (SD_readSector(FSInfo_SEC, SD_buff) == SD_READ_SUCCESS)
+	{
 
-		FSInfo_t *p_fsinfo = (FSInfo_t*) SD_buff;
+		FSInfo_t *p_fsinfo = (FSInfo_t *)SD_buff;
 		uint32_t nxtFreeClus = p_fsinfo->FSI_Nxt_Free;
 
 		while (fatNextClus(nxtFreeClus) != 0x00000000)
 			nxtFreeClus++;
 
-		if (updateFSInfo(nxtFreeClus)) {
+		if (updateFSInfo(nxtFreeClus))
+		{
 			return nxtFreeClus;
-		} else
+		}
+		else
 			return 0xFFFFFFFF;
-	} else
+	}
+	else
 		return 0xFFFFFFFF;
 }
 
-static myFile createFile(const char *path, const char *filename, bool isDir) {
+static myFile createFile(const char *path, const char *filename, bool isDir)
+{
 	myFile pathDir;
 
 	myFile tempFile = pathExists(path);
-	if (startCluster(&tempFile) == 0) {
-		//USB_SerialPrint("Invalid path!");
+	if (startCluster(&tempFile) == 0)
+	{
+		// USB_SerialPrint("Invalid path!");
 		return tempFile;
 	}
 
@@ -864,13 +964,14 @@ static myFile createFile(const char *path, const char *filename, bool isDir) {
 
 	tempFile = fileExists(filename, &pathDir);
 
-	if (startCluster(&tempFile) != 0) {
-		//USB_SerialPrint("File exists!");
+	if (startCluster(&tempFile) != 0)
+	{
+		// USB_SerialPrint("File exists!");
 		tempFile.entryIndex = 0;
 		return tempFile;
 	}
 
-	myFile newFile = { 0 };
+	myFile newFile = {0};
 
 	uint32_t fileStartClus = getNxtFreeClus();
 	fileSetStartClus(&newFile, fileStartClus);
@@ -882,24 +983,30 @@ static myFile createFile(const char *path, const char *filename, bool isDir) {
 
 	freeEntInf_t frEnt;
 
-	if (mixedLetters(filename) || (fileNameLength(filename) > 8)) {
-		for (uint8_t i = 0; i < strlen(filename); i++) {
-			if (filename[i] == '.') {
+	if (mixedLetters(filename) || (fileNameLength(filename) > 8))
+	{
+		for (uint8_t i = 0; i < strlen(filename); i++)
+		{
+			if (filename[i] == '.')
+			{
 				tempIndx = i + 1;
 				break;
 			}
-			if (i < 8) {
+			if (i < 8)
+			{
 				if ((filename[i] > 96) && (filename[i] < 123))
 					newFile.DIR_Name[i] = filename[i] - 32;
 				else
 					newFile.DIR_Name[i] = filename[i];
 			}
-			if (fileNameLength(filename) > 8) {
+			if (fileNameLength(filename) > 8)
+			{
 				newFile.DIR_Name[6] = '~';
 				newFile.DIR_Name[7] = '1';
 			}
 		}
-		for (uint8_t i = 0; i < 3; i++) {
+		for (uint8_t i = 0; i < 3; i++)
+		{
 			if (filename[tempIndx + i] == '\0')
 				break;
 			newFile.DIR_ext[i] = filename[tempIndx + i] - 32;
@@ -915,11 +1022,11 @@ static myFile createFile(const char *path, const char *filename, bool isDir) {
 
 		frEnt = getFreeEntry(&pathDir, lfnEntCnt + 1);
 		SD_readSector(startSecOfClus(frEnt.Cluster) + frEnt.sectorIndex,
-				SD_buff);
+					  SD_buff);
 
-		while (lfnEntCnt) {
-			LFN_entry_t *entry = (LFN_entry_t*) (SD_buff
-					+ (frEnt.entryIndex + lfnEntCnt - 1) * 32);
+		while (lfnEntCnt)
+		{
+			LFN_entry_t *entry = (LFN_entry_t *)(SD_buff + (frEnt.entryIndex + lfnEntCnt - 1) * 32);
 			entry->LDIR_Attr = ATTR_LONG_FILE_NAME;
 			entry->LDIR_FstClusLO = 0;
 			entry->LDIR_Type = 0;
@@ -932,15 +1039,18 @@ static myFile createFile(const char *path, const char *filename, bool isDir) {
 			if (lfnEntCnt == 1)
 				entry->LDIR_Ord |= 0x40;
 
-			for (uint8_t i = 0; i < 10; i += 2) {
+			for (uint8_t i = 0; i < 10; i += 2)
+			{
 				if (filename[nameIndex] != 0)
 					entry->LDIR_Name1[i] = filename[nameIndex++];
 			}
-			for (uint8_t i = 0; i < 12; i += 2) {
+			for (uint8_t i = 0; i < 12; i += 2)
+			{
 				if (filename[nameIndex] != 0)
 					entry->LDIR_Name2[i] = filename[nameIndex++];
 			}
-			for (uint8_t i = 0; i < 4; i += 2) {
+			for (uint8_t i = 0; i < 4; i += 2)
+			{
 				if (filename[nameIndex] != 0)
 					entry->LDIR_Name3[i] = filename[nameIndex++];
 			}
@@ -948,15 +1058,18 @@ static myFile createFile(const char *path, const char *filename, bool isDir) {
 			lfnEntCnt--;
 		}
 		frEnt.entryIndex += temp;
-	} else
+	}
+	else
 
 	{
 		frEnt = getFreeEntry(&pathDir, 1);
 		SD_readSector(startSecOfClus(frEnt.Cluster) + frEnt.sectorIndex,
-				SD_buff);
+					  SD_buff);
 
-		for (uint8_t i = 0; i < 9; i++) {
-			if (filename[i] == '.') {
+		for (uint8_t i = 0; i < 9; i++)
+		{
+			if (filename[i] == '.')
+			{
 				tempIndx = i + 1;
 				break;
 			}
@@ -966,7 +1079,8 @@ static myFile createFile(const char *path, const char *filename, bool isDir) {
 			else
 				newFile.DIR_Name[i] = filename[i];
 		}
-		for (uint8_t i = 0; i < 3; i++) {
+		for (uint8_t i = 0; i < 3; i++)
+		{
 			if (filename[i] == '\0')
 				break;
 			newFile.DIR_ext[i] = filename[tempIndx + i] - 32;
@@ -994,34 +1108,41 @@ static myFile createFile(const char *path, const char *filename, bool isDir) {
 	newFile.fileEntInf.sectorIndex = frEnt.sectorIndex;
 	newFile.fileEntInf.entryIndex = frEnt.entryIndex;
 
-	myFile *pFile = (myFile*) (SD_buff + frEnt.entryIndex * 32);
+	myFile *pFile = (myFile *)(SD_buff + frEnt.entryIndex * 32);
 	memcpy(pFile, &newFile, 32);
 
 	if (SD_writeSector(startSecOfClus(frEnt.Cluster) + frEnt.sectorIndex,
-			SD_buff) == SD_WRITE_SUCCESS) {
-		//USB_SerialPrint("File Created!\n");
+					   SD_buff) == SD_WRITE_SUCCESS)
+	{
+		// USB_SerialPrint("File Created!\n");
 		return newFile;
-	} else {
+	}
+	else
+	{
 		memset(&tempFile, 0, sizeof(myFile));
 		return tempFile;
 	}
 }
 
-myFile fileOpen(const char *path, const char *filename) {
+myFile fileOpen(const char *path, const char *filename)
+{
 	return createFile(path, filename, false);
 }
 
-myFile createDirectory(const char *path, const char *dirName) {
+myFile createDirectory(const char *path, const char *dirName)
+{
 	myFile parentDir = pathExists(path);
 
-	if (startCluster(&parentDir) == 0) {
-		//USB_SerialPrint("Invalid path!");
+	if (startCluster(&parentDir) == 0)
+	{
+		// USB_SerialPrint("Invalid path!");
 		return parentDir;
 	}
 
 	myFile thisDir = fileExists(dirName, &parentDir);
 
-	if (startCluster(&thisDir) != 0) {
+	if (startCluster(&thisDir) != 0)
+	{
 		// //USB_SerialPrint("Folder exists!");
 		return thisDir;
 	}
@@ -1043,7 +1164,7 @@ myFile createDirectory(const char *path, const char *dirName) {
 	memset(SD_buff, 0, 512);
 
 	for (uint8_t sectorIndex = 0; sectorIndex < params.BPB_SecPerClus;
-			sectorIndex++)
+		 sectorIndex++)
 		SD_writeSector(startSecOfClus(dirStartClus) + sectorIndex, SD_buff);
 
 	memcpy(SD_buff, &thisDir, 32);
@@ -1054,7 +1175,8 @@ myFile createDirectory(const char *path, const char *dirName) {
 	return thisDir;
 }
 
-bool fileWrite(myFile *pFile, const char *data) {
+bool fileWrite(myFile *pFile, const char *data)
+{
 	uint32_t startClus = startCluster(pFile);
 	uint16_t byteIndex = pFile->DIR_FileSize % 512;
 	uint32_t sectorIndex = pFile->DIR_FileSize / 512;
@@ -1065,8 +1187,10 @@ bool fileWrite(myFile *pFile, const char *data) {
 	sectorIndex = sectorIndex % params.BPB_SecPerClus;
 	uint32_t tempClus;
 
-	if (clusterCnt > 1) {
-		while (clusterCnt) {
+	if (clusterCnt > 1)
+	{
+		while (clusterCnt)
+		{
 			tempClus = startClus;
 			startClus = fatNextClus(startClus);
 			clusterCnt--;
@@ -1079,34 +1203,33 @@ bool fileWrite(myFile *pFile, const char *data) {
 	if (byteIndex != 0)
 		SD_readSector(startSecOfClus(startClus) + sectorIndex, SD_buff);
 	for (uint32_t sector = sectorIndex; sector < params.BPB_SecPerClus;
-			sector++) {
-		for (uint32_t i = byteIndex; i < 512; i++) {
+		 sector++)
+	{
+		for (uint32_t i = byteIndex; i < 512; i++)
+		{
 			SD_buff[i] = data[byteCnt++];
-			if (byteCnt == strlen(data)) {
+			if (byteCnt == strlen(data))
+			{
 				moreData = false;
 				break;
 			}
 		}
 		byteIndex = 0;
 
-		if (SD_writeSector(startSecOfClus(startClus) + sector, SD_buff)
-				== SD_WRITE_ERROR)
+		if (SD_writeSector(startSecOfClus(startClus) + sector, SD_buff) == SD_WRITE_ERROR)
 			return false;
 
-		if (!moreData) {
+		if (!moreData)
+		{
 			pFile->DIR_FileSize += strlen(data);
 
 			if (SD_readSector(
-					startSecOfClus(pFile->fileEntInf.Cluster)
-							+ pFile->fileEntInf.sectorIndex, SD_buff)
-					== SD_READ_SUCCESS) {
-				myFile *p_temp = (myFile*) (SD_buff
-						+ pFile->fileEntInf.entryIndex * 32);
+					startSecOfClus(pFile->fileEntInf.Cluster) + pFile->fileEntInf.sectorIndex, SD_buff) == SD_READ_SUCCESS)
+			{
+				myFile *p_temp = (myFile *)(SD_buff + pFile->fileEntInf.entryIndex * 32);
 				memcpy(p_temp, pFile, 32);
 				if (SD_writeSector(
-						startSecOfClus(pFile->fileEntInf.Cluster)
-								+ pFile->fileEntInf.sectorIndex, SD_buff)
-						== SD_WRITE_SUCCESS)
+						startSecOfClus(pFile->fileEntInf.Cluster) + pFile->fileEntInf.sectorIndex, SD_buff) == SD_WRITE_SUCCESS)
 					return true;
 			}
 			return false;
@@ -1115,12 +1238,14 @@ bool fileWrite(myFile *pFile, const char *data) {
 	return true;
 }
 
-bool fileDelete(const char *path, const char *filename) {
+bool fileDelete(const char *path, const char *filename)
+{
 	myFile pathDir;
 
 	myFile tempFile = pathExists(path);
-	if (startCluster(&tempFile) == 0) {
-		//USB_SerialPrint("Invalid path!");
+	if (startCluster(&tempFile) == 0)
+	{
+		// USB_SerialPrint("Invalid path!");
 		return false;
 	}
 
@@ -1128,35 +1253,36 @@ bool fileDelete(const char *path, const char *filename) {
 
 	tempFile = fileExists(filename, &pathDir);
 
-	if (startCluster(&tempFile) == 0) {
-		//USB_SerialPrint("File doesnt exists!");
+	if (startCluster(&tempFile) == 0)
+	{
+		// USB_SerialPrint("File doesnt exists!");
 		return false;
 	}
 
 	uint8_t lfnEntCnt = 0;
-	if (mixedLetters(filename) || (fileNameLength(filename) > 8)) {
+	if (mixedLetters(filename) || (fileNameLength(filename) > 8))
+	{
 		lfnEntCnt = strlen(filename) / 13;
 		if ((strlen(filename) % 13) != 0)
 			lfnEntCnt += 1;
 	}
 
 	if (SD_readSector(
-			startSecOfClus(tempFile.fileEntInf.Cluster)
-					+ tempFile.fileEntInf.sectorIndex, SD_buff)
-			== SD_READ_SUCCESS) {
-		for (uint8_t i = 0; i < (lfnEntCnt + 1); i++) {
-			myFile *p_temp = (myFile*) (SD_buff
-					+ (tempFile.fileEntInf.entryIndex - i) * 32);
+			startSecOfClus(tempFile.fileEntInf.Cluster) + tempFile.fileEntInf.sectorIndex, SD_buff) == SD_READ_SUCCESS)
+	{
+		for (uint8_t i = 0; i < (lfnEntCnt + 1); i++)
+		{
+			myFile *p_temp = (myFile *)(SD_buff + (tempFile.fileEntInf.entryIndex - i) * 32);
 			p_temp->DIR_Name[0] = 0xE5;
 		}
 
 		if (SD_writeSector(
-				startSecOfClus(tempFile.fileEntInf.Cluster)
-						+ tempFile.fileEntInf.sectorIndex, SD_buff)
-				== SD_WRITE_SUCCESS) {
+				startSecOfClus(tempFile.fileEntInf.Cluster) + tempFile.fileEntInf.sectorIndex, SD_buff) == SD_WRITE_SUCCESS)
+		{
 			uint32_t fileClus = startCluster(&tempFile);
 			uint32_t tempClus;
-			while (fileClus < FAT_EOC) {
+			while (fileClus < FAT_EOC)
+			{
 				tempClus = fileClus;
 				fileClus = fatNextClus(fileClus);
 				fatSetNextClus(tempClus, 0x00000000);
@@ -1173,12 +1299,14 @@ bool fileDelete(const char *path, const char *filename) {
  * @brief Funtion to initialize SD Cart and FAT parameters.
  * @return true/fasle returns true upon successful initialization;Otherse returs false.
  */
-bool mySdFat_init() {
+bool mySdFat_init()
+{
 
 	if (SD_init() == SD_INIT_ERROR)
 		return false;
 
-	if (getBootSecParams()) {
+	if (getBootSecParams())
+	{
 
 		FatStartSector = BOOT_SEC_START + params.BPB_RsvdSecCnt; // 0X2020
 
@@ -1186,8 +1314,7 @@ bool mySdFat_init() {
 
 		RootDirStartSector = FatStartSector + FatSectorsCnt;
 
-		RootDirSectors = (32 * params.BPB_RootEntCnt + params.BPB_BytesPerSec
-				- 1) / params.BPB_BytesPerSec; // 0 for FAT32
+		RootDirSectors = (32 * params.BPB_RootEntCnt + params.BPB_BytesPerSec - 1) / params.BPB_BytesPerSec; // 0 for FAT32
 
 		DataStartSector = RootDirStartSector + RootDirSectors; // 0X96AE
 
@@ -1198,26 +1325,27 @@ bool mySdFat_init() {
 		float tmpFrac = size - sizeInt;
 		uint16_t tmpInt = tmpFrac * 100;
 
-		//USB_SerialPrint("Card Size=%d.%d GB\n", sizeInt, tmpInt);
+		// USB_SerialPrint("Card Size=%d.%d GB\n", sizeInt, tmpInt);
 
-		//USB_SerialPrint("FAT type is: ");
-		switch (getFatType()) {
+		// USB_SerialPrint("FAT type is: ");
+		switch (getFatType())
+		{
 		case FAT12:
-			//USB_SerialPrint("FAT12\n");
+			// USB_SerialPrint("FAT12\n");
 			break;
 		case FAT16:
-			//USB_SerialPrint("FAT16\n");
+			// USB_SerialPrint("FAT16\n");
 			break;
 
 		case FAT32:
-			//USB_SerialPrint("FAT32\n");
+			// USB_SerialPrint("FAT32\n");
 			break;
 
 		default:
 			break;
 		}
 
-		//USB_SerialPrint("Volume Label: %s\n", params.BS_VolLab);
+		// USB_SerialPrint("Volume Label: %s\n", params.BS_VolLab);
 
 		return true;
 	}
