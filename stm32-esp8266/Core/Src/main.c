@@ -112,6 +112,7 @@ static bool mqtt_connect() {
 	return esp8266_mqtt_connect(&conn_params);
 }
 
+//Subscribe to a topic
 static bool mqtt_subscribe() {
 	mqtt_subscribe_params_t subs_params;
 	subs_params.link_id = 0;
