@@ -86,7 +86,7 @@ void mqtt_cb(mqtt_data_t *mqtt_data) {
 			mqtt_data->link_id, mqtt_data->topic);
 	USB_SerialPrint("Message->%s\n\n", mqtt_data->data);
 }
-//Configure mqtt user client parameters.
+//Configure MQTT Client parameters.
 static bool mqtt_config() {
 
 	mqtt_user_cfg_t user_cfg = { 0 };
