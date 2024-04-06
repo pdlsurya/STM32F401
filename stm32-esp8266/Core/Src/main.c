@@ -102,7 +102,7 @@ static bool mqtt_config() {
 	return esp8266_mqtt_user_config(&user_cfg);
 
 }
-//Connect to mqtt broker.
+//Connect to mqtt Broker.
 static bool mqtt_connect() {
 	mqtt_connect_params_t conn_params;
 	conn_params.link_id = 0;
