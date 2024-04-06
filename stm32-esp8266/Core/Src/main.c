@@ -80,6 +80,7 @@ void rx_cb_0(esp8266_rx_data_t *data) {
 	esp8266_send_ip_data(LOCAL_LINK, (uint8_t*) "ACK from STM32!", 15);
 }
 
+//Mqtt callback
 void mqtt_cb(mqtt_data_t *mqtt_data) {
 	USB_SerialPrint("\nMQTT Message received on MQTT link->%d\nTopic->%s\n",
 			mqtt_data->link_id, mqtt_data->topic);
