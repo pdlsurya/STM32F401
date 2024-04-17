@@ -304,11 +304,10 @@ myFile nextFile(myFile *pFolder)
 		return temp;
 	}
 
+	SD_readSector(startSecOfClus(currentClus) + sectorIndex, SD_buff);
+
 	while (1)
 	{
-
-		SD_readSector(startSecOfClus(currentClus) + sectorIndex, SD_buff);
-
 		temp = *((myFile *)(SD_buff + (pFolder->entryIndex % 16) * 32));
 
 		if (!isFreeEntry(&temp))
@@ -328,7 +327,7 @@ myFile nextFile(myFile *pFolder)
 				char tempName[LFN_entryCnt][13];
 				while (LFN_entryCnt)
 				{
-					uint8_t tempNameIndex;
+					uint8_t tempNameIndex = 0;
 					LFN_entry_t *entry = (LFN_entry_t *)(SD_buff + (pFolder->entryIndex % 16) * 32);
 
 					for (uint8_t i = 0; i < 10; i += 2)
@@ -344,7 +343,6 @@ myFile nextFile(myFile *pFolder)
 							entry->LDIR_Name3[i];
 
 					LFN_entryCnt--;
-					tempNameIndex = 0;
 					pFolder->entryIndex++;
 
 					if ((pFolder->entryIndex % 16) == 0)
@@ -363,8 +361,7 @@ myFile nextFile(myFile *pFolder)
 							}
 						}
 
-						SD_readSector(startSecOfClus(currentClus) + sectorIndex,
-									  SD_buff);
+						SD_readSector(startSecOfClus(currentClus) + sectorIndex, SD_buff);
 					}
 				}
 
@@ -422,6 +419,7 @@ myFile nextFile(myFile *pFolder)
 				memset(&temp, 0, sizeof(myFile));
 				return temp;
 			}
+			SD_readSector(startSecOfClus(currentClus) + sectorIndex, SD_buff);
 		}
 	}
 	temp.entryIndex = isDirectory(&temp) ? 2 : 0;
