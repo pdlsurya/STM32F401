@@ -1,6 +1,6 @@
 #SD-Bootloader
 - Example for SD/microSD bootloader
--Accepts HEX file only
+- Accepts HEX file only
 
 #stm32-esp8266
 - ESP8266 based esp-01 module interfacing with stm32.
